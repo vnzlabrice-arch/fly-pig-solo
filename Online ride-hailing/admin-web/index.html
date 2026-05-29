@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>飞猪出行管理端</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="login-screen" id="loginScreen">
+    <div class="login-panel">
+      <div class="brand-lockup">
+        <span class="brand-mark">飞</span>
+        <div>
+          <h1>飞猪出行管理端</h1>
+          <p>平台调度、运营配置与系统权限</p>
+        </div>
+      </div>
+
+      <form class="login-form" id="loginForm">
+        <label>
+          <span>账号</span>
+          <input id="loginUsername" name="username" type="text" value="admin" autocomplete="username">
+        </label>
+        <label>
+          <span>密码</span>
+          <input id="loginPassword" name="password" type="password" value="123456" autocomplete="current-password">
+        </label>
+        <button class="primary-btn full" type="submit">登录管理后台</button>
+      </form>
+      <p class="login-note">默认连接本地 admin-api，未启动服务时自动进入演示数据。</p>
+    </div>
+
+    <div class="login-preview">
+      <div class="preview-top">
+        <span>今日运营</span>
+        <strong>稳定</strong>
+      </div>
+      <div class="preview-grid">
+        <div>
+          <span>进行中订单</span>
+          <strong>86</strong>
+        </div>
+        <div>
+          <span>在线司机</span>
+          <strong>124</strong>
+        </div>
+        <div>
+          <span>售后待办</span>
+          <strong>12</strong>
+        </div>
+        <div>
+          <span>城市配置</span>
+          <strong>18</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell hidden" id="appShell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark">飞</span>
+        <div>
+          <strong>飞猪出行</strong>
+          <span>平台管理端</span>
+        </div>
+      </div>
+      <nav class="nav" id="mainNav"></nav>
+      <div class="sidebar-foot">
+        <span id="apiModeTag">演示数据</span>
+        <button class="ghost-btn" id="openSettingBtn" type="button">接口设置</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="pageModule">工作台</p>
+          <h2 id="pageTitle">运营概览</h2>
+        </div>
+        <div class="topbar-actions">
+          <div class="search-box">
+            <span>搜索</span>
+            <input id="globalSearch" type="search" placeholder="订单号、账号、城市">
+          </div>
+          <button class="icon-btn" id="refreshBtn" type="button" aria-label="刷新">↻</button>
+          <button class="theme-toggle" id="themeToggleBtn" type="button" aria-label="切换主题">
+            <span class="theme-dot"></span>
+            <strong id="themeToggleText">蓝白</strong>
+          </button>
+          <div class="admin-chip">
+            <span id="adminAvatar">A</span>
+            <div>
+              <strong id="adminName">admin</strong>
+              <small id="adminRole">超级管理员</small>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="content" id="content"></section>
+    </main>
+  </div>
+
+  <div class="drawer-mask hidden" id="drawerMask"></div>
+  <aside class="drawer hidden" id="drawer">
+    <div class="drawer-head">
+      <div>
+        <p class="eyebrow" id="drawerType">编辑</p>
+        <h3 id="drawerTitle">表单</h3>
+      </div>
+      <button class="icon-btn" id="closeDrawerBtn" type="button" aria-label="关闭">×</button>
+    </div>
+    <form class="drawer-form" id="drawerForm"></form>
+  </aside>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="./api.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

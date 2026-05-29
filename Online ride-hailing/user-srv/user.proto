@@ -1,0 +1,360 @@
+syntax = "proto3";
+
+package user;
+option go_package="./usermodel";
+
+message RegisterReq {
+  string phone = 1;     // 手机号
+  string code = 2;      // 验证码
+  string nickname = 3;  // 昵称
+  string avatar = 4;    // 头像
+}
+
+message RegisterResp {
+  int32 code = 1;       // 状态码
+  string message = 2;   // 消息
+  int64 user_id = 3;    // 用户ID
+}
+
+message LoginReq {
+  string phone = 1;     // 手机号
+  string code = 2;      // 验证码（可选）
+}
+
+message LoginResp {
+  int32 code = 1;       // 状态码
+  string message = 2;   // 消息
+  int64 user_id = 3;    // 用户ID
+  string token = 4;     // 登录令牌
+}
+
+message SendCodeReq {
+  string phone = 1;     // 手机号
+}
+
+message SendCodeResp {
+  int32 code = 1;       // 状态码
+  string message = 2;   // 消息
+}
+
+message UserDetailReq {
+  int64 user_id = 1;    // 用户ID
+}
+
+message UserDetailResp {
+  int32 code = 1;       // 状态码
+  string message = 2;   // 消息
+  int64 user_id = 3;    // 用户ID
+  string phone = 4;      // 手机号
+  string nickname = 5;   // 昵称
+  string avatar = 6;     // 头像
+  int32 user_type = 7;   // 用户类型：1-乘客，2-司机
+  int64 create_time = 8; // 注册时间
+  int64 last_login_time = 9; // 最后登录时间
+}
+
+message UserListReq {
+  int32 page = 1;       // 页码
+  int32 page_size = 2;   // 每页数量
+}
+
+message UserInfo {
+  int64 user_id = 1;    // 用户ID
+  string phone = 2;      // 手机号
+  string nickname = 3;   // 昵称
+  string avatar = 4;     // 头像
+  int32 user_type = 5;   // 用户类型
+  int64 create_time = 6; // 注册时间
+}
+
+message UserListResp {
+  int32 code = 1;       // 状态码
+  string message = 2;   // 消息
+  repeated UserInfo users = 3; // 用户列表
+  int32 total = 4;      // 总数
+  int32 page = 5;       // 当前页码
+  int32 page_size = 6;  // 每页数量
+}
+
+message UpdatePhoneReq {
+  int64 user_id = 1;    // 用户ID
+  string old_phone = 2;  // 旧手机号
+  string new_phone = 3;  // 新手机号
+  string code = 4;      // 验证码（用于验证旧手机号）
+}
+
+message UpdatePhoneResp {
+  int32 code = 1;       // 状态码
+  string message = 2;   // 消息
+}
+
+message RealNameAuthReq {
+  int64 user_id = 1;    // 用户ID
+  string real_name = 2;  // 真实姓名
+  string id_card = 3;    // 身份证号
+}
+message RealNameAuthResp {
+  int32 code = 1;       // 状态码
+  string message = 2;   // 消息
+  bool is_auth = 3;     // 是否认证成功
+}
+message AddAddressReq {
+  int64 user_id = 1;    // 用户ID
+  string tag = 2;        // 地址标签（如：家、公司、学校）
+  string address = 3;    // 地址详情
+  bool is_default = 4; // 是否设为默认地址
+}
+message AddressInfo {
+  int64 id = 1;         // 地址ID
+  int64 user_id = 2;    // 用户ID
+  string tag = 3;        // 地址标签
+  string address = 4;    // 地址详情
+  double lng = 5;       // 经度
+  double lat = 6;       // 纬度
+  bool is_default = 7;  // 是否默认地址
+  int64 create_time = 8; // 创建时间
+}
+
+message AddAddressResp {
+  int32 code = 1;       // 状态码
+  string message = 2;   // 消息
+  int64 address_id = 3; // 新增地址ID
+}
+
+message AddCouponReq {
+  int64 user_id = 1;     // 用户ID
+  int64 template_id = 2; // 优惠券模板ID
+  int32 count = 3;       // 发放数量（默认1）
+}
+
+message AddCouponResp {
+  int32 code = 1;       // 状态码
+  string message = 2;   // 消息
+  int32 success_count = 3; // 成功发放数量
+}
+
+message UserCouponInfo {
+  int64 id = 1;         // 优惠券ID
+  int64 user_id = 2;    // 用户ID
+  int64 template_id = 3; // 模板ID
+  string coupon_no = 4; // 券唯一编码
+  int32 status = 5;     // 状态 1-未使用 2-已使用 3-已过期 4-已作废
+  int64 start_time = 6; // 生效时间
+  int64 end_time = 7;   // 过期时间
+  int64 create_time = 8; // 创建时间
+}
+
+message UserCouponListReq {
+  int64 user_id = 1;    // 用户ID
+  int32 status = 2;     // 状态筛选：0-全部，1-未使用，2-已使用，3-已过期
+  int32 page = 3;       // 页码
+  int32 page_size = 4;  // 每页数量
+}
+
+message UserCouponListResp {
+  int32 code = 1;            // 状态码
+  string message = 2;        // 消息
+  repeated UserCouponInfo coupons = 3; // 用户优惠券列表
+  int32 total = 4;           // 总数
+  int32 page = 5;            // 当前页码
+  int32 page_size = 6;       // 每页数量
+}
+
+message AddCouponTemplateReq {
+  string name = 1;              // 优惠券名称
+  int32 type = 2;               // 券类型 1-满减 2-折扣 3-立减 4-新人券
+  double discount = 3;          // 折扣（仅折扣券）
+  double min_amount = 4;        // 使用门槛
+  double reduce_amount = 5;     // 减免金额
+  double max_reduce = 6;        // 折扣券最高减免
+  int32 valid_type = 7;         // 有效期类型 1-固定日期 2-领取后N天
+  int64 valid_start = 8;        // 固定有效期开始（时间戳）
+  int64 valid_end = 9;          // 固定有效期结束（时间戳）
+  int32 valid_days = 10;        // 领取后有效天数
+  int32 total = 11;             // 发放总数量 0=不限
+  int32 per_limit = 12;         // 每人限领张数
+  string city_code = 13;        // 可用城市编码
+  string start_region = 14;     // 可用起点区域
+  string end_region = 15;       // 可用终点区域
+  string car_type = 16;         // 可用车型
+  string use_time = 17;         // 可用时段
+}
+
+message AddCouponTemplateResp {
+  int32 code = 1;               // 状态码
+  string message = 2;           // 消息
+  int64 template_id = 3;        // 模板ID
+}
+
+message AvailableCouponTemplateInfo {
+  int64 template_id = 1;         // 模板ID
+  string name = 2;               // 优惠券名称
+  int32 type = 3;                // 券类型 1-满减 2-折扣 3-立减 4-新人券
+  double discount = 4;            // 折扣
+  double min_amount = 5;          // 使用门槛
+  double reduce_amount = 6;      // 减免金额
+  double max_reduce = 7;         // 折扣券最高减免
+  int32 valid_type = 8;          // 有效期类型 1-固定日期 2-领取后N天
+  int64 valid_start = 9;         // 固定有效期开始（时间戳）
+  int64 valid_end = 10;         // 固定有效期结束（时间戳）
+  int32 valid_days = 11;        // 领取后有效天数
+  int32 total = 12;             // 发放总数量
+  int32 received = 13;          // 已领取数量
+  int32 remain = 14;            // 剩余数量
+  int32 per_limit = 15;         // 每人限领张数
+  int32 user_received = 16;      // 用户已领取张数
+  string city_code = 17;        // 可用城市编码
+  string start_region = 18;     // 可用起点区域
+  string end_region = 19;       // 可用终点区域
+  string car_type = 20;         // 可用车型
+  string use_time = 21;         // 可用时段
+}
+
+message GetAvailableCouponsReq {
+  int64 user_id = 1;    // 用户ID
+  int32 page = 2;       // 页码
+  int32 page_size = 3;  // 每页数量
+}
+
+message GetAvailableCouponsResp {
+  int32 code = 1;               // 状态码
+  string message = 2;           // 消息
+  repeated AvailableCouponTemplateInfo templates = 3; // 可领取优惠券列表
+  int32 total = 4;              // 总数
+  int32 page = 5;               // 当前页码
+  int32 page_size = 6;          // 每页数量
+}
+message AddPassengerOrderReq {
+  int64 user_id = 1;       // 用户ID（乘客）
+  string passenger_name = 2; // 乘客姓名
+  string passenger_phone = 3; // 乘客电话
+  string start_address = 4;  // 出发地址
+  float start_lng = 5;      // 出发地经度
+  float start_lat = 6;      // 出发地纬度
+  string end_address = 7;    // 目的地地址
+  float end_lng = 8;        // 目的地经度
+  float end_lat = 9;        // 目的地纬度
+  int32 car_type = 10;      // 车型：1-经济型，2-舒适型，3-商务型，4-豪华型
+  int64 coupon_id = 11;     // 优惠券ID（可选）
+  string remark = 12;       // 备注（可选）
+}
+
+message AddPassengerOrderResp {
+  int32 code = 1;           // 状态码
+  string message = 2;       // 消息
+  string AlipayUrl = 3;      // 支付订单网址
+}
+
+// 订单费用明细
+message OrderFeeDetail {
+  int32 fee_type = 1;                 // 费用类型：1-起步价，2-里程费，3-时长费，4-远途费，5-夜间费，6-其他
+  string fee_name = 2;                // 费用名称
+  double amount = 3;                  // 金额
+  string description = 4;             // 说明（如：5.2公里、25分钟）
+}
+
+// 乘客订单信息
+message PassengerOrderInfo {
+  string order_id = 1;       // 订单号
+  int64 passenger_id = 2;    // 乘客ID
+  string passenger_name = 3; // 乘客姓名
+  string passenger_phone = 4; // 乘客电话
+  string passenger_avatar = 5; // 乘客头像
+  int32 order_type = 6;      // 订单类型：1-即时用车，2-预约用车，3-拼车
+  string car_type = 7;       // 车型：经济型、舒适型、商务型、豪华型
+  int32 status = 8;          // 状态：1-待支付，2-待接单，3-待上车，4-行程中，5-已完成，6-已取消
+  int32 pay_status = 9;      // 支付状态：1-待支付，2-已支付，3-已退款
+  string start_address = 10;  // 出发地址
+  double start_lng = 11;      // 出发地经度
+  double start_lat = 12;     // 出发地纬度
+  string end_address = 13;   // 目的地地址
+  double end_lng = 14;       // 目的地经度
+  double end_lat = 15;       // 目的地纬度
+  double distance = 16;      // 行驶距离(米)
+  int32 duration = 17;       // 行驶时长(秒)
+  string coupon_name = 18;   // 使用的优惠券名称
+  double coupon_amount = 19; // 优惠券抵扣金额
+  double estimated_price = 20; // 预估价格
+  double actual_price = 21;   // 实际支付价格
+  int64 driver_id = 22;      // 司机ID
+  string driver_name = 23;   // 司机姓名
+  string driver_phone = 24;  // 司机电话
+  string driver_avatar = 25; // 司机头像
+  double driver_score = 26;  // 司机评分
+  string license_plate = 27; // 车牌号
+  string vehicle_color = 28; // 车辆颜色
+  string vehicle_model = 29; // 车辆型号
+  string remark = 30;        // 备注
+  int64 book_time = 31;      // 下单时间/预约时间
+  int64 accept_time = 32;    // 接单时间
+  int64 arrive_time = 33;    // 到达起点时间
+  int64 start_time = 34;     // 上车时间
+  int64 finish_time = 35;    // 完成时间
+  int64 cancel_time = 36;    // 取消时间
+  string cancel_reason = 37; // 取消原因
+  int64 create_time = 38;    // 创建时间
+  int64 update_time = 39;    // 更新时间
+}
+
+// 用户订单列表请求
+message UserOrderListReq {
+  int64 user_id = 1;    // 用户ID（乘客）
+  int32 status = 2;     // 状态筛选：0-全部，1-待支付，2-待接单，3-待上车，4-行程中，5-已完成，6-已取消
+  int32 page = 3;       // 页码
+  int32 page_size = 4;  // 每页数量
+}
+
+// 用户订单列表响应
+message UserOrderListResp {
+  int32 code = 1;                       // 状态码
+  string message = 2;                   // 消息
+  repeated PassengerOrderInfo orders = 3; // 订单列表
+  int32 total = 4;                      // 总数
+  int32 page = 5;                       // 当前页码
+  int32 page_size = 6;                  // 每页数量
+}
+
+// 订单详情请求
+message PassengerOrderDetailReq {
+  int64 user_id = 1;    // 用户ID（乘客）
+  string order_id = 2;  // 订单号
+}
+
+// 订单详情响应
+message PassengerOrderDetailResp {
+  int32 code = 1;                           // 状态码
+  string message = 2;                       // 消息
+  PassengerOrderInfo order = 3;             // 订单详情
+  repeated OrderFeeDetail fee_details = 4;  // 费用明细列表
+}
+
+// 查询未支付订单请求
+message GetUnpaidOrdersReq {
+  int32 hours_before = 1; // 查询多少小时内的订单（默认24）
+}
+
+// 查询未支付订单响应
+message GetUnpaidOrdersResp {
+  int32 code = 1;                       // 状态码
+  string message = 2;                   // 消息
+  repeated PassengerOrderInfo orders = 3; // 未支付订单列表
+}
+
+service User {
+  rpc Register(RegisterReq) returns(RegisterResp);
+  rpc Login(LoginReq) returns(LoginResp);
+  rpc SendCode(SendCodeReq) returns(SendCodeResp);
+  rpc GetUserDetail(UserDetailReq) returns(UserDetailResp);
+  rpc GetUserList(UserListReq) returns(UserListResp);
+  rpc UpdatePhone(UpdatePhoneReq) returns(UpdatePhoneResp);
+  rpc RealNameAuth(RealNameAuthReq) returns(RealNameAuthResp);
+  rpc AddAddress(AddAddressReq) returns(AddAddressResp);
+  rpc AddCoupon(AddCouponReq) returns(AddCouponResp);
+  rpc GetUserCouponList(UserCouponListReq) returns(UserCouponListResp);
+  rpc AddCouponTemplate(AddCouponTemplateReq) returns(AddCouponTemplateResp);
+  rpc GetAvailableCoupons(GetAvailableCouponsReq) returns(GetAvailableCouponsResp);
+  rpc AddPassengerOrder(AddPassengerOrderReq) returns(AddPassengerOrderResp);
+  rpc GetUserOrderList(UserOrderListReq) returns(UserOrderListResp);
+  rpc GetPassengerOrderDetail(PassengerOrderDetailReq) returns(PassengerOrderDetailResp);
+  rpc GetUnpaidOrders(GetUnpaidOrdersReq) returns(GetUnpaidOrdersResp);
+}

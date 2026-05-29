@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 接口测试工具</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 20px; text-align: center; }
+        .section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .api-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .api-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #fafafa;
+            cursor: pointer;
+        }
+        .api-header:hover { background: #f0f0f0; }
+        .method {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+            min-width: 50px;
+            text-align: center;
+        }
+        .method.post { background: #61affe; color: #fff; }
+        .method.get { background: #61affe; color: #fff; }
+        .path { color: #333; font-family: monospace; font-size: 14px; }
+        .toggle { margin-left: auto; color: #999; }
+        .api-body { display: none; padding: 15px; background: #fff; }
+        .api-body.active { display: block; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 13px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group textarea { height: 100px; resize: vertical; font-family: monospace; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .btn-primary { background: #007bff; color: #fff; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-success { background: #28a745; color: #fff; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger { background: #dc3545; color: #fff; }
+        .btn-danger:hover { background: #c82333; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        .result pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .result-label { 
+            font-weight: bold; 
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box h3 { font-size: 14px; margin-bottom: 10px; }
+        .info-box p { font-size: 13px; color: #666; margin-bottom: 5px; }
+        .auth-info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .auth-info input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 API 接口测试工具</h1>
+        
+        <div class="info-box">
+            <h3>接口说明</h3>
+            <p><strong>POST</strong> 接口：需要传入 JSON 格式的请求体</p>
+            <p><strong>GET</strong> 接口：需要传入 URL 参数（会自动拼接）</p>
+            <p><strong>需要认证</strong> 的接口会自动使用 localStorage 中的 token</p>
+        </div>
+
+        <div class="auth-info">
+            <h3 style="margin-bottom:10px;">🔑 认证信息</h3>
+            <label>Token:</label>
+            <input type="text" id="authToken" placeholder="Bearer Token">
+            <label>User ID:</label>
+            <input type="number" id="authUserId" placeholder="用户ID">
+            <button class="btn btn-primary" onclick="loadAuthFromStorage()">从 localStorage 加载</button>
+            <button class="btn btn-success" onclick="saveAuthToStorage()">保存到 localStorage</button>
+        </div>
+
+        <!-- 发送验证码 -->
+        <div class="section">
+            <h2>1️⃣ 发送验证码 (无需认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method post">POST</span>
+                    <span class="path">/user/sendCode</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>phone (手机号)</label>
+                        <input type="text" id="sendCode_phone" value="13800138000">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('sendCode', '/user/sendCode', 'POST', false)">发送请求</button>
+                    <div class="result" id="result_sendCode"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户注册 -->
+        <div class="section">
+            <h2>2️⃣ 用户注册 (无需认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method post">POST</span>
+                    <span class="path">/user/register</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>phone (手机号)</label>
+                        <input type="text" id="register_phone" value="13800138000">
+                    </div>
+                    <div class="form-group">
+                        <label>password (密码)</label>
+                        <input type="text" id="register_password" value="123456">
+                    </div>
+                    <div class="form-group">
+                        <label>code (验证码)</label>
+                        <input type="text" id="register_code" value="123456">
+                    </div>
+                    <div class="form-group">
+                        <label>nickname (昵称)</label>
+                        <input type="text" id="register_nickname" value="测试用户">
+                    </div>
+                    <div class="form-group">
+                        <label>avatar (头像URL，可选)</label>
+                        <input type="text" id="register_avatar" value="">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('register', '/user/register', 'POST', false)">注册</button>
+                    <button class="btn btn-success" onclick="testApiAutoFill('register', '/user/register', 'POST', false)">自动填充并注册</button>
+                    <div class="result" id="result_register"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户登录 -->
+        <div class="section">
+            <h2>3️⃣ 用户登录 (无需认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method post">POST</span>
+                    <span class="path">/user/login</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>phone (手机号)</label>
+                        <input type="text" id="login_phone" value="13800138000">
+                    </div>
+                    <div class="form-group">
+                        <label>code (验证码)</label>
+                        <input type="text" id="login_code" value="123456">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('login', '/user/login', 'POST', false)">登录</button>
+                    <button class="btn btn-success" onclick="loginAndSave()">登录并保存Token</button>
+                    <div class="result" id="result_login"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 获取用户详情 -->
+        <div class="section">
+            <h2>4️⃣ 获取用户详情 (需要认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method post">POST</span>
+                    <span class="path">/user/detail</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>user_id (用户ID)</label>
+                        <input type="number" id="detail_user_id" value="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('detail', '/user/detail', 'POST', true)">获取详情</button>
+                    <div class="result" id="result_detail"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 获取用户列表 -->
+        <div class="section">
+            <h2>5️⃣ 获取用户列表 (需要认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method get">GET</span>
+                    <span class="path">/user/list</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>page (页码)</label>
+                        <input type="number" id="list_page" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>page_size (每页数量)</label>
+                        <input type="number" id="list_page_size" value="10">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('list', '/user/list', 'GET', true)">获取列表</button>
+                    <div class="result" id="result_list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 更新手机号 -->
+        <div class="section">
+            <h2>6️⃣ 更新手机号 (需要认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method post">POST</span>
+                    <span class="path">/user/updatePhone</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>user_id</label>
+                        <input type="number" id="updatePhone_user_id" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>old_phone (旧手机号)</label>
+                        <input type="text" id="updatePhone_old_phone" value="13800138000">
+                    </div>
+                    <div class="form-group">
+                        <label>new_phone (新手机号)</label>
+                        <input type="text" id="updatePhone_new_phone" value="13900139000">
+                    </div>
+                    <div class="form-group">
+                        <label>code (验证码)</label>
+                        <input type="text" id="updatePhone_code" value="123456">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('updatePhone', '/user/updatePhone', 'POST', true)">更新手机号</button>
+                    <div class="result" id="result_updatePhone"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实名认证 -->
+        <div class="section">
+            <h2>7️⃣ 实名认证 (需要认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method post">POST</span>
+                    <span class="path">/user/realNameAuth</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>user_id</label>
+                        <input type="number" id="realName_user_id" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>real_name (真实姓名)</label>
+                        <input type="text" id="realName_real_name" value="张三">
+                    </div>
+                    <div class="form-group">
+                        <label>id_card (身份证号)</label>
+                        <input type="text" id="realName_id_card" value="110101199001011234">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('realName', '/user/realNameAuth', 'POST', true)">提交认证</button>
+                    <div class="result" id="result_realName"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 领取优惠券 -->
+        <div class="section">
+            <h2>8️⃣ 领取优惠券 (需要认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method post">POST</span>
+                    <span class="path">/user/addCoupon</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>userId</label>
+                        <input type="number" id="coupon_userId" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>templateId (优惠券模板ID)</label>
+                        <input type="number" id="coupon_templateId" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>count (领取数量)</label>
+                        <input type="number" id="coupon_count" value="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('coupon', '/user/addCoupon', 'POST', true)">领取优惠券</button>
+                    <div class="result" id="result_coupon"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 获取用户优惠券 -->
+        <div class="section">
+            <h2>9️⃣ 获取用户优惠券 (需要认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method get">GET</span>
+                    <span class="path">/user/getUserCoupon</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>userId</label>
+                        <input type="number" id="userCoupon_userId" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>status (0-全部, 1-未使用, 2-已使用, 3-已过期)</label>
+                        <input type="number" id="userCoupon_status" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>page (页码)</label>
+                        <input type="number" id="userCoupon_page" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>pageSize (每页数量)</label>
+                        <input type="number" id="userCoupon_pageSize" value="10">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('userCoupon', '/user/getUserCoupon', 'GET', true)">获取优惠券</button>
+                    <div class="result" id="result_userCoupon"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加乘客订单 -->
+        <div class="section">
+            <h2>🔟 添加乘客订单 (需要认证)</h2>
+            <div class="api-item">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <span class="method post">POST</span>
+                    <span class="path">/user/addPassengerOrderReq</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="api-body">
+                    <div class="form-group">
+                        <label>userId</label>
+                        <input type="number" id="order_userId" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>passengerName (乘客姓名)</label>
+                        <input type="text" id="order_passengerName" value="张三">
+                    </div>
+                    <div class="form-group">
+                        <label>passengerPhone (乘客电话)</label>
+                        <input type="text" id="order_passengerPhone" value="13800138000">
+                    </div>
+                    <div class="form-group">
+                        <label>startAddress (出发地址)</label>
+                        <input type="text" id="order_startAddress" value="北京市朝阳区">
+                    </div>
+                    <div class="form-group">
+                        <label>startLng (出发地经度)</label>
+                        <input type="number" step="0.0001" id="order_startLng" value="116.397428">
+                    </div>
+                    <div class="form-group">
+                        <label>startLat (出发地纬度)</label>
+                        <input type="number" step="0.0001" id="order_startLat" value="39.908823">
+                    </div>
+                    <div class="form-group">
+                        <label>endAddress (目的地址)</label>
+                        <input type="text" id="order_endAddress" value="北京市海淀区">
+                    </div>
+                    <div class="form-group">
+                        <label>endLng (目的地经度)</label>
+                        <input type="number" step="0.0001" id="order_endLng" value="116.31234">
+                    </div>
+                    <div class="form-group">
+                        <label>endLat (目的地纬度)</label>
+                        <input type="number" step="0.0001" id="order_endLat" value="39.94567">
+                    </div>
+                    <div class="form-group">
+                        <label>carType (车型: 1-快车, 2-优享, 3-专车, 4-豪华)</label>
+                        <input type="number" id="order_carType" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>couponId (优惠券ID，可选)</label>
+                        <input type="number" id="order_couponId" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>remark (备注，可选)</label>
+                        <input type="text" id="order_remark" value="">
+                    </div>
+                    <button class="btn btn-primary" onclick="testApi('order', '/user/addPassengerOrderReq', 'POST', true)">创建订单</button>
+                    <div class="result" id="result_order"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8888';
+
+        // 加载 localStorage 中的认证信息
+        function loadAuthFromStorage() {
+            document.getElementById('authToken').value = localStorage.getItem('user_token') || '';
+            document.getElementById('authUserId').value = localStorage.getItem('user_id') || '';
+        }
+
+        // 保存认证信息到 localStorage
+        function saveAuthToStorage() {
+            localStorage.setItem('user_token', document.getElementById('authToken').value);
+            localStorage.setItem('user_id', document.getElementById('authUserId').value);
+            alert('已保存到 localStorage');
+        }
+
+        // 切换 API 展开/收起
+        function toggleApi(el) {
+            const body = el.nextElementSibling;
+            const toggle = el.querySelector('.toggle');
+            if (body.classList.contains('active')) {
+                body.classList.remove('active');
+                toggle.textContent = '▼';
+            } else {
+                body.classList.add('active');
+                toggle.textContent = '▲';
+            }
+        }
+
+        // 构建请求数据
+        function buildRequestData(apiName) {
+            const prefix = apiName;
+            const inputs = document.querySelectorAll(`#result_${prefix}`).parentElement.querySelectorAll('input');
+            const data = {};
+            
+            // 根据不同的 API 获取对应的输入框值
+            const fieldMap = {
+                'sendCode': ['sendCode_phone'],
+                'register': ['register_phone', 'register_password', 'register_code', 'register_nickname', 'register_avatar'],
+                'login': ['login_phone', 'login_code'],
+                'detail': ['detail_user_id'],
+                'list': ['list_page', 'list_page_size'],
+                'updatePhone': ['updatePhone_user_id', 'updatePhone_old_phone', 'updatePhone_new_phone', 'updatePhone_code'],
+                'realName': ['realName_user_id', 'realName_real_name', 'realName_id_card'],
+                'coupon': ['coupon_userId', 'coupon_templateId', 'coupon_count'],
+                'userCoupon': ['userCoupon_userId', 'userCoupon_status', 'userCoupon_page', 'userCoupon_pageSize'],
+                'order': ['order_userId', 'order_passengerName', 'order_passengerPhone', 'order_startAddress', 
+                         'order_startLng', 'order_startLat', 'order_endAddress', 'order_endLng', 'order_endLat',
+                         'order_carType', 'order_couponId', 'order_remark']
+            };
+
+            const fields = fieldMap[apiName] || [];
+            fields.forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                if (input) {
+                    // 将下划线格式的ID转换为驼峰或下划线格式
+                    const key = fieldId.replace(new RegExp('^' + prefix + '_'), '');
+                    let value = input.value;
+                    
+                    // 数字类型转换
+                    if (input.type === 'number') {
+                        value = value === '' ? 0 : Number(value);
+                    }
+                    
+                    // 映射字段名
+                    const fieldMapping = {
+                        'phone': 'phone',
+                        'password': 'password',
+                        'code': 'code',
+                        'nickname': 'nickname',
+                        'avatar': 'avatar',
+                        'user_id': 'user_id',
+                        'page': 'page',
+                        'page_size': 'page_size',
+                        'userId': 'userId',
+                        'old_phone': 'old_phone',
+                        'new_phone': 'new_phone',
+                        'real_name': 'real_name',
+                        'id_card': 'id_card',
+                        'templateId': 'templateId',
+                        'count': 'count',
+                        'status': 'status',
+                        'pageSize': 'pageSize',
+                        'passengerName': 'passengerName',
+                        'passengerPhone': 'passengerPhone',
+                        'startAddress': 'startAddress',
+                        'startLng': 'startLng',
+                        'startLat': 'startLat',
+                        'endAddress': 'endAddress',
+                        'endLng': 'endLng',
+                        'endLat': 'endLat',
+                        'carType': 'carType',
+                        'couponId': 'couponId',
+                        'remark': 'remark'
+                    };
+                    
+                    data[fieldMapping[key] || key] = value;
+                }
+            });
+            
+            return data;
+        }
+
+        // 测试 API
+        async function testApi(apiName, path, method, needAuth) {
+            const resultDiv = document.getElementById(`result_${apiName}`);
+            resultDiv.innerHTML = '<div class="result-label">⏳ 请求中...</div>';
+            
+            try {
+                let url = API_BASE + path;
+                let body = null;
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                // 获取 token
+                const tokenInput = document.getElementById('authToken').value;
+                const token = tokenInput || localStorage.getItem('user_token');
+                
+                if (needAuth && token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                if (method === 'GET') {
+                    // GET 请求：将参数拼接到 URL
+                    const data = buildRequestData(apiName);
+                    const params = new URLSearchParams();
+                    for (const [key, value] of Object.entries(data)) {
+                        if (value !== '' && value !== null && value !== undefined) {
+                            params.append(key, value);
+                        }
+                    }
+                    if (params.toString()) {
+                        url += '?' + params.toString();
+                    }
+                } else {
+                    // POST 请求：JSON body
+                    body = JSON.stringify(buildRequestData(apiName));
+                }
+                
+                console.log(`请求: ${method} ${url}`);
+                console.log('Body:', body);
+                
+                const response = await fetch(url, {
+                    method,
+                    headers,
+                    body
+                });
+                
+                const result = await response.json();
+                
+                let statusClass = response.ok ? 'success' : 'error';
+                let statusText = response.ok ? '✅ 成功' : `❌ 失败 (${response.status})`;
+                
+                resultDiv.innerHTML = `
+                    <div class="result-label ${statusClass}">${statusText}</div>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result-label error">❌ 网络错误</div>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+
+        // 登录并保存 Token
+        async function loginAndSave() {
+            const phone = document.getElementById('login_phone').value;
+            const code = document.getElementById('login_code').value;
+            
+            try {
+                const response = await fetch(API_BASE + '/user/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, code })
+                });
+                
+                const result = await response.json();
+                
+                if (result.code === 0 || result.code === 200) {
+                    const userId = result.data?.user_id || result.data?.UserId;
+                    const token = result.data?.token || result.data?.Token;
+                    
+                    if (token) {
+                        localStorage.setItem('user_token', token);
+                        localStorage.setItem('user_id', String(userId));
+                        document.getElementById('authToken').value = token;
+                        document.getElementById('authUserId').value = userId;
+                        alert('登录成功！Token 已保存到 localStorage');
+                    }
+                    
+                    document.getElementById('result_login').innerHTML = `
+                        <div class="result-label success">✅ 登录成功</div>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    document.getElementById('result_login').innerHTML = `
+                        <div class="result-label error">❌ 登录失败</div>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('result_login').innerHTML = `
+                    <div class="result-label error">❌ 网络错误</div>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+
+        // 自动填充并注册
+        async function testApiAutoFill(apiName, path, method, needAuth) {
+            // 1. 先发送验证码
+            const phone = document.getElementById('register_phone').value;
+            try {
+                await fetch(API_BASE + '/user/sendCode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+            } catch (e) {}
+            
+            // 2. 使用默认验证码注册
+            document.getElementById('register_code').value = '123456';
+            testApi(apiName, path, method, needAuth);
+        }
+
+        // 页面加载时自动加载认证信息
+        window.onload = function() {
+            loadAuthFromStorage();
+        };
+    </script>
+</body>
+</html>

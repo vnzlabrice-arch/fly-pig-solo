@@ -1,0 +1,8 @@
+NaCos:
+  Host: "115.190.196.35"
+  Port: 8848
+  PublicId: ""
+  NaCosName: "nacos"
+  Password: "nacos"
+  Group: "DEFAULT_GROUP"
+  DataId : "2309a_ykk"

@@ -1,0 +1,11 @@
+go 1.26
+
+use (
+	"Online ride-hailing/admin-srv"
+	Online ride-hailing/admin-api
+	Online ride-hailing/admin-srv
+	Online ride-hailing/driver-srv
+
+	Online ride-hailing/user-api
+	Online ride-hailing/user-srv
+)

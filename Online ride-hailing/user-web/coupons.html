@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>优惠券 - 飞猪出行</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .coupon-page {
+      min-height: 100vh;
+      background: var(--bg-gray);
+      padding-bottom: 80px;
+    }
+    
+    .page-header {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      height: 56px;
+      background: var(--bg-white);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      z-index: 100;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .page-header h1 {
+      flex: 1;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .back-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    
+    .coupon-list {
+      padding: 72px 16px 16px;
+    }
+    
+    .coupon-empty {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .coupon-empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+    
+    .coupon-empty-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    
+    .get-coupon-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .coupon-card {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .coupon-available {
+      display: flex;
+      align-items: stretch;
+    }
+    
+    .coupon-left {
+      width: 100px;
+      background: linear-gradient(135deg, var(--primary) 0%, #FF8533 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      color: white;
+    }
+    
+    .coupon-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    
+    .coupon-unit {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    
+    .coupon-right {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .coupon-name {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .coupon-desc {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+    
+    .coupon-time {
+      font-size: 11px;
+      color: var(--text-light);
+    }
+    
+    .coupon-action {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    .use-btn {
+      padding: 8px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    
+    .coupon-used .coupon-left {
+      background: var(--text-light);
+    }
+    
+    .coupon-used .coupon-value,
+    .coupon-used .coupon-unit {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+    
+    .coupon-expired .coupon-left {
+      background: var(--text-light);
+    }
+    
+    .coupon-expired .coupon-value,
+    .coupon-expired .coupon-unit {
+      opacity: 0.6;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-left: 8px;
+    }
+    
+    .status-badge.used {
+      background: var(--bg-gray);
+      color: var(--text-light);
+    }
+    
+    .status-badge.expired {
+      background: #FFEBEE;
+      color: #C62828;
+    }
+    
+    .tab-bar {
+      display: flex;
+      background: var(--bg-white);
+      border-bottom: 1px solid var(--border-color);
+      position: fixed;
+      top: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      z-index: 99;
+    }
+    
+    .tab-item {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .tab-item.active {
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
+    .tab-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+    
+    .banner {
+      background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .banner-text h3 {
+      font-size: 16px;
+      color: #8B4513;
+      margin-bottom: 4px;
+    }
+    
+    .banner-text p {
+      font-size: 12px;
+      color: #A0522D;
+    }
+    
+    .banner-btn {
+      padding: 10px 20px;
+      background: #8B4513;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="coupon-page">
+    <header class="page-header">
+      <button class="back-btn" onclick="history.back()">←</button>
+      <h1>优惠券</h1>
+      <div style="width: 32px;"></div>
+    </header>
+    
+    <div class="tab-bar">
+      <div class="tab-item active" data-tab="available">可用优惠券</div>
+      <div class="tab-item" data-tab="used">已使用</div>
+      <div class="tab-item" data-tab="expired">已过期</div>
+    </div>
+    
+    <div class="coupon-list" id="couponList">
+      <div class="banner">
+        <div class="banner-text">
+          <h3>新人专享</h3>
+          <p>注册即送首单优惠券</p>
+        </div>
+        <button class="banner-btn">立即领取</button>
+      </div>
+    </div>
+    
+    <nav class="bottom-nav">
+      <div class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">首页</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">订单</span>
+      </div>
+      <div class="nav-item active">
+        <span class="nav-icon">🎫</span>
+        <span class="nav-text">优惠券</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">我的</span>
+      </div>
+    </nav>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+  <script src="./api.js"></script>
+  <script>
+    (function() {
+      const couponList = document.getElementById('couponList');
+      const toast = document.getElementById('toast');
+      const tabItems = document.querySelectorAll('.tab-item');
+      const navItems = document.querySelectorAll('.nav-item');
+      
+      let currentTab = 'available';
+      
+      function showToast(message, type = 'success') {
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(() => toast.className = 'toast', 2500);
+      }
+      
+      function renderCoupon(coupon) {
+        return `
+          <div class="coupon-card coupon-${coupon.status}">
+            <div class="coupon-available">
+              <div class="coupon-left">
+                <span class="coupon-value">${coupon.value}</span>
+                <span class="coupon-unit">元</span>
+              </div>
+              <div class="coupon-right">
+                <div class="coupon-name">
+                  ${coupon.name}
+                  ${coupon.status === 'used' ? '<span class="status-badge used">已使用</span>' : ''}
+                  ${coupon.status === 'expired' ? '<span class="status-badge expired">已过期</span>' : ''}
+                </div>
+                <div class="coupon-desc">${coupon.desc}</div>
+                <div class="coupon-time">有效期至 ${coupon.expireTime}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      function renderCoupons(coupons) {
+        let html = '';
+        
+        if (currentTab === 'available') {
+          html += `
+            <div class="banner">
+              <div class="banner-text">
+                <h3>新人专享</h3>
+                <p>注册即送首单优惠券</p>
+              </div>
+              <button class="banner-btn" onclick="showToast('领取成功')">立即领取</button>
+            </div>
+          `;
+        }
+        
+        if (!coupons || coupons.length === 0) {
+          html += `
+            <div class="coupon-empty">
+              <div class="coupon-empty-icon">🎫</div>
+              <div class="coupon-empty-text">暂无${currentTab === 'available' ? '可用' : currentTab === 'used' ? '已使用' : '已过期'}优惠券</div>
+              ${currentTab === 'available' ? '<div class="get-coupon-btn">去领取更多</div>' : ''}
+            </div>
+          `;
+        } else {
+          html += coupons.map(renderCoupon).join('');
+        }
+        
+        couponList.innerHTML = html;
+      }
+      
+      function loadCoupons() {
+        const mockCoupons = [
+          {
+            id: 1,
+            status: 'available',
+            value: 10,
+            name: '新人专享券',
+            desc: '限快车、优享使用',
+            expireTime: '2026-06-30'
+          },
+          {
+            id: 2,
+            status: 'available',
+            value: 5,
+            name: '平日出行券',
+            desc: '满20元可用',
+            expireTime: '2026-05-31'
+          },
+          {
+            id: 3,
+            status: 'used',
+            value: 15,
+            name: '周末特惠券',
+            desc: '限周六周日使用',
+            expireTime: '2026-04-30'
+          },
+          {
+            id: 4,
+            status: 'expired',
+            value: 8,
+            name: '限时抢优惠券',
+            desc: '满30元可用',
+            expireTime: '2026-03-31'
+          }
+        ];
+        
+        let filteredCoupons = mockCoupons;
+        if (currentTab !== 'available') {
+          filteredCoupons = mockCoupons.filter(c => c.status === currentTab);
+        }
+        
+        renderCoupons(filteredCoupons);
+      }
+      
+      tabItems.forEach(item => {
+        item.addEventListener('click', () => {
+          tabItems.forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          currentTab = item.dataset.tab;
+          loadCoupons();
+        });
+      });
+      
+      navItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+          if (index === 0) window.location.href = './ride-hailing.html';
+          else if (index === 1) window.location.href = './order.html';
+          else if (index === 3) window.location.href = './profile.html';
+        });
+      });
+      
+      loadCoupons();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+syntax = "proto3";
+
+package driver;
+option go_package="./driver";
+
+service Driver {
+  //司机认证模块
+  rpc SendSms(SendSmsReq) returns(SendSmsResp);//短信发送
+  rpc DriverLogin(DriverLoginReq) returns(DriverLoginResp);//司机注册
+  rpc DriverAuth(DriverAuthReq) returns(DriverAuthResp);//司机实名认证
+  rpc CartAuth(CartAuthReq) returns(CartAuthResp);//车辆认证
+   rpc OutLogin(OutLoginReq) returns(OutLoginResp); //退出登录
+
+  //司机接单与订单模块
+  rpc AcceptOrder(AcceptOrderReq) returns(AcceptOrderResp);                           //抢单/接单
+  rpc CancelOrder(CancelOrderReq) returns(CancelOrderResp);                           //取消订单
+  rpc ArrivePassengerLocation(ArrivePassengerLocationReq) returns(ArrivePassengerLocationResp); //到达乘客位置
+  rpc StartTrip(StartTripReq) returns(StartTripResp);                                 //开始行程
+  rpc DriverOrderDetail(DriverOrderDetailReq) returns(DriverOrderDetailResp);         //订单详情
+  rpc DriverOrderList(DriverOrderListReq) returns(DriverOrderListResp);               //进行中订单
+  rpc DriverOrderHistory(DriverOrderHistoryReq) returns(DriverOrderHistoryResp);      //历史订单
+  rpc StartAcceptOrder(StartAcceptOrderReq) returns(StartAcceptOrderResp);            //开始接单
+  rpc StopAcceptOrder(StopAcceptOrderReq) returns(StopAcceptOrderResp);               //停止接单
+  rpc DriverOnline(DriverOnlineReq) returns(DriverOnlineResp);                        //司机上线
+  rpc DriverOffline(DriverOfflineReq) returns(DriverOfflineResp);                     //司机下线
+
+  //司机信息模块
+  rpc DriverRegister(DriverRegisterReq) returns(DriverRegisterResp);
+  rpc GetDriverInfo(GetDriverInfoReq) returns(GetDriverInfoResp);
+  rpc UpdateDriverInfo(UpdateDriverInfoReq) returns(UpdateDriverInfoResp);
+  rpc SubmitDriverCert(SubmitDriverCertReq) returns(SubmitDriverCertResp);
+  rpc StatusDriverCert(StatusDriverCertReq) returns(StatusDriverCertResp);
+
+}
+
+//退出登录
+message OutLoginReq {
+
+}
+message OutLoginResp {
+  bool success = 1;
+
+}
+
+//车辆认证
+message CartAuthReq {
+  string carPlate = 1;
+  string carModel = 2;
+  string drivingLicense = 3;
+  string token = 4;
+}
+
+message CartAuthResp {
+  string msg = 1;
+}
+
+//司机实名认证
+message DriverAuthReq {
+  string realName = 1;
+  string iDCard = 2;
+  string iDCardFront = 3;
+  string iDCardBack = 4;
+  string licenseImg = 5;
+  string token = 6;
+}
+
+message DriverAuthResp {
+ string msg = 1;
+}
+
+
+//司机注册/登录一体化
+message DriverLoginReq {
+  string phone = 1;
+  string code = 2;
+  int64 driverId = 3;
+}
+
+message DriverLoginResp {
+  int64 driverId = 1;
+  string token = 2;
+  int64 auditStatus = 3;
+  int64 cartStatus = 4;
+}
+
+//短信发送
+message SendSmsReq {
+  string phone = 1;
+}
+
+message SendSmsResp {
+  bool success = 1;
+}
+
+// --- 通用类型 ---
+message Location {
+  float lng = 1;
+  float lat = 2;
+}
+
+// --- 司机上下线 ---
+message DriverOnlineReq {
+  int64 driverId = 1;
+  Location driverLocation = 2;
+  int64 carStatus = 3;
+  int64 onlineType = 4;
+}
+message DriverOnlineResp {
+  bool success = 1;
+  string restReminder = 2;
+}
+
+message DriverOfflineReq {
+  int64 driverId = 1;
+  Location driverLocation = 2;
+  int64 carStatus = 3;
+}
+message DriverOfflineResp {
+  bool success = 1;
+  string restReminder = 2;
+}
+
+// --- 开始/停止接单 ---
+message StartAcceptOrderReq {
+  int64 driverId = 1;
+}
+message StartAcceptOrderResp {
+  bool success = 1;
+}
+
+message StopAcceptOrderReq {
+  int64 driverId = 1;
+}
+message StopAcceptOrderResp {
+  bool success = 1;
+}
+
+// --- 抢单/接单 ---
+message AcceptOrderReq {
+  int64 driverId = 1;
+  string orderId = 2;
+  int64 orderDistance = 3;
+  Location driverCurrentLocation = 4;
+  string antiFraudToken = 5;
+}
+message AcceptOrderResp {
+  bool success = 1;
+  string orderLockTime = 2;
+}
+
+// --- 取消订单 ---
+message CancelOrderReq {
+  int64 driverId = 1;
+  string orderId = 2;
+  string reason = 3;
+  string evidencePhoto = 4;
+}
+message CancelOrderResp {
+  bool success = 1;
+  float cancelFee = 2;
+  string cancelResponsibility = 3;
+  bool appealSupport = 4;
+}
+
+// --- 到达乘客位置 ---
+message ArrivePassengerLocationReq {
+  int64 driverId = 1;
+  string orderId = 2;
+  float arrivalAccuracy = 3;
+  float driverLng = 4;
+  float driverLat = 5;
+  string arrivalPhoto = 6;
+}
+message ArrivePassengerLocationResp {
+  bool success = 1;
+}
+
+// --- 开始行程 ---
+message StartTripReq {
+  int64 driverId = 1;
+  string orderId = 2;
+  float startOdometer = 3;
+  string passengerConfirmCode = 4;
+  string pickupPhoto = 5;
+}
+message StartTripResp {
+  bool success = 1;
+}
+
+// --- 进行中订单列表 ---
+message DriverOrderListReq {
+  int64 driverId = 1;
+}
+message DriverOrderListResp {
+  string orderId = 1;
+  int64 orderType = 2;
+  string carType = 3;
+  int64 status = 4;
+  string passengerName = 5;
+  string passengerPhone = 6;
+  string passengerAvatar = 7;
+  string startAddress = 8;
+  float startLng = 9;
+  float startLat = 10;
+  string endAddress = 11;
+  float endLng = 12;
+  float endLat = 13;
+  string passRemark = 14;
+  string bookTime = 15;
+  string pickupTime = 16;
+  string startTime = 17;
+  string driverRemark = 18;
+  int64 passengerRiskLevel = 19;
+  string estimatedArrivalTime = 20;
+  float surgePrice = 21;
+}
+
+// --- 订单详情 ---
+message DriverOrderDetailReq {
+  int64 driverId = 1;
+  string orderId = 2;
+}
+
+message DriverIncomeDetailData {
+  float totalFee = 1;
+  float platformFee = 2;
+  float actualIncome = 3;
+}
+
+message DriverOrderDetailItem {
+  string orderId = 1;
+  int64 orderType = 2;
+  string carType = 3;
+  int64 status = 4;
+  string startAddress = 5;
+  float startLng = 6;
+  float startLat = 7;
+  string endAddress = 8;
+  float endLng = 9;
+  float endLat = 10;
+  string passengerName = 11;
+  string passengerPhone = 12;
+  string passengerAvatar = 13;
+  string passRemark = 14;
+  float estimatedPrice = 15;
+  float finalPrice = 16;
+  float platformFee = 17;
+  float actualIncome = 18;
+  string bookTime = 19;
+  string pickupTime = 20;
+  string startTime = 21;
+  string endTime = 22;
+  string cancelReason = 23;
+  int64 payStatus = 24;
+  string payType = 25;
+  string payTime = 26;
+  float couponDeduction = 27;
+  DriverIncomeDetailData driverIncomeDetail = 28;
+  int64 complaintStatus = 29;
+  repeated string passengerTags = 30;
+}
+
+message DriverOrderDetailResp {
+  repeated DriverOrderDetailItem driverOrderDetailItem = 1;
+}
+
+// --- 历史订单 ---
+message DriverOrderHistoryReq {
+  int64 driverId = 1;
+  int64 status = 2;
+  int64 payStatus = 3;
+  string searchKeyword = 4;
+  string startDate = 5;
+  string endDate = 6;
+  float minIncome = 7;
+  float maxIncome = 8;
+  int32 page = 9;
+  int32 size = 10;
+}
+
+message DriverOrderHistoryItem {
+  string orderId = 1;
+  int64 orderType = 2;
+  string carType = 3;
+  int64 status = 4;
+  string startAddress = 5;
+  string endAddress = 6;
+  float finalPrice = 7;
+  float actualIncome = 8;
+  string bookTime = 9;
+  string endTime = 10;
+  int64 payStatus = 11;
+  float serviceScore = 12;
+}
+
+message DriverOrderHistoryResp {
+  repeated DriverOrderHistoryItem driverOrderHistoryItem = 1;
+  int64 total = 2;
+}
+
+// --- 司机注册 ---
+message DriverRegisterReq {
+  string phone = 1;
+  string code = 2;
+  string nickname = 3;
+}
+message DriverRegisterResp {
+  int64 driverId = 1;
+}
+
+// --- 获取司机信息 ---
+message GetDriverInfoReq {
+  int64 driverID = 1;
+}
+message GetDriverInfoResp {
+  int64 driverID = 1;
+  string phone = 2;
+  string realName = 3;
+  int64 authType = 4;
+  int64 auditStatus = 5;
+  string licenseNo = 6;
+  string licenseExpire = 7;
+  int64 driveYears = 8;
+}
+
+// --- 更新司机信息 ---
+message UpdateDriverInfoReq {
+  int64 driverID = 1;
+  string nickname = 2;
+  string avatarURL = 3;
+}
+message UpdateDriverInfoResp {
+  bool success = 1;
+}
+
+// --- 提交司机认证 ---
+message SubmitDriverCertReq {
+  int64 driverId = 1;
+  string realName = 2;
+  string licenseNo = 3;
+  string licenseExpire = 4;
+  int64 driveYears = 5;
+  int64 authType = 6;
+  string picURL = 7;
+}
+message SubmitDriverCertResp {
+  bool success = 1;
+}
+
+// --- 查询认证状态 ---
+message StatusDriverCertReq {
+  int64 driverId = 1;
+}
+message StatusDriverCertResp {
+  int64 authType = 1;
+  int64 auditStatus = 2;
+  string reason = 3;
+  string licenseNo = 4;
+  string realName = 5;
+}

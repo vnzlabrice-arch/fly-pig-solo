@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>花小猪</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- 高德地图 SDK -->
+  <script type="text/javascript">
+    window._AMapSecurityConfig = {
+      securityJsCode: 'e45d6a631efdffdc60eecd60679764f1', // 请替换为您的安全密钥
+    }
+  </script>
+  <script src="https://webapi.amap.com/maps?v=2.0&key=3d6b19102ee6b29817a1cbe4c7dc2ef9"></script> <!-- 请替换为您的Key -->
+  <script src="https://webapi.amap.com/loca?v=2.0.0&key=3d6b19102ee6b29817a1cbe4c7dc2ef9"></script>
+  <script src="//webapi.amap.com/ui/1.1/main.js"></script>
+</head>
+<body>
+  <div class="app">
+    <!-- 顶部导航 -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-icon">🚗</span>
+          <span class="logo-text">花小猪</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="header-btn" id="msgBtn">
+          <span class="icon">🔔</span>
+        </button>
+        <button class="header-btn" id="userBtn">
+          <span class="icon">👤</span>
+        </button>
+      </div>
+    </header>
+
+
+    <!-- 地图区域 -->
+    <div class="map-container">
+      <div id="amap-container" class="map">
+        <div id="map" class="map-real"></div>
+      </div>
+      <button class="location-btn" id="locationBtn" title="定位到当前位置">
+        <span>📍</span>
+      </button>
+      <div class="map-loading" id="mapLoading">
+        <div class="loading-spinner"></div>
+        <span>地图加载中...</span>
+      </div>
+    </div>
+
+    <!-- 可滚动内容区域 -->
+    <div class="content-area">
+      <!-- 订单卡片 -->
+      <div class="order-card">
+        <div class="input-group from-group">
+        <div class="input-icon from-icon">
+          <div class="dot green"></div>
+        </div>
+        <div class="input-wrapper">
+          <input type="text" id="fromAddress" placeholder="出发地" readonly>
+        </div>
+        <button class="input-action" id="fromLocation">
+          <span>📍</span>
+        </button>
+      </div>
+
+      <div class="connector">
+        <div class="line"></div>
+        <div class="connector-icon">⚡</div>
+      </div>
+
+      <div class="input-group to-group">
+        <div class="input-icon to-icon">
+          <div class="dot red"></div>
+        </div>
+        <div class="input-wrapper">
+          <input type="text" id="toAddress" placeholder="您想去哪儿?" class="to-input">
+        </div>
+        <button class="input-action" id="clearToBtn" style="display: none;">
+          <span>✕</span>
+        </button>
+      </div>
+
+      <div class="destination-panel" id="destinationPanel">
+        <div class="panel-header">
+          <input type="text" id="searchInput" placeholder="输入目的地">
+        </div>
+        <div class="panel-content" id="panelContent">
+          <div class="suggestion-item" data-action="airport">
+            <div class="suggestion-icon">✈️</div>
+            <div class="suggestion-info">
+              <div class="suggestion-title">机场</div>
+              <div class="suggestion-desc">首都国际机场 T3 航站楼</div>
+            </div>
+          </div>
+          <div class="suggestion-item" data-action="train">
+            <div class="suggestion-icon">🚄</div>
+            <div class="suggestion-info">
+              <div class="suggestion-title">火车站</div>
+              <div class="suggestion-desc">北京站</div>
+            </div>
+          </div>
+          <div class="suggestion-item" data-action="hospital">
+            <div class="suggestion-icon">🏥</div>
+            <div class="suggestion-info">
+              <div class="suggestion-title">医院</div>
+              <div class="suggestion-desc">北京大学第三医院</div>
+            </div>
+          </div>
+          <div class="suggestion-item" data-action="school">
+            <div class="suggestion-icon">🏫</div>
+            <div class="suggestion-info">
+              <div class="suggestion-title">学校</div>
+              <div class="suggestion-desc">北京大学</div>
+            </div>
+          </div>
+          <div class="suggestion-item" data-action="shopping">
+            <div class="suggestion-icon">🛒</div>
+            <div class="suggestion-info">
+              <div class="suggestion-title">购物中心</div>
+              <div class="suggestion-desc">三里屯太古里</div>
+            </div>
+          </div>
+          <div class="suggestion-item" data-action="home">
+            <div class="suggestion-icon">🏠</div>
+            <div class="suggestion-info">
+              <div class="suggestion-title">家庭住址</div>
+              <div class="suggestion-desc">点击添加家庭住址</div>
+            </div>
+          </div>
+          <div class="suggestion-item" data-action="company">
+            <div class="suggestion-icon">🏢</div>
+            <div class="suggestion-info">
+              <div class="suggestion-title">公司</div>
+              <div class="suggestion-desc">点击添加公司地址</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 车型选择 -->
+    <div class="car-type-section" id="carTypeSection" style="display: none;">
+      <div class="section-title">
+        <span>选择车型</span>
+        <button class="more-btn">更多 ∨</button>
+      </div>
+      <div class="car-types">
+        <div class="car-type active" data-type="1" data-name="快车" data-price="12">
+          <div class="car-badge">特惠</div>
+          <div class="car-icon">🚗</div>
+          <div class="car-info">
+            <div class="car-name">快车</div>
+            <div class="car-desc">预计 <span class="eta">5</span> 分钟</div>
+          </div>
+          <div class="car-price">
+            <span class="price">¥12</span>
+            <span class="original">¥18</span>
+          </div>
+        </div>
+        <div class="car-type" data-type="2" data-name="优享" data-price="18">
+          <div class="car-icon">🚙</div>
+          <div class="car-info">
+            <div class="car-name">优享</div>
+            <div class="car-desc">预计 <span class="eta">7</span> 分钟</div>
+          </div>
+          <div class="car-price">
+            <span class="price">¥18</span>
+          </div>
+        </div>
+        <div class="car-type" data-type="3" data-name="专车" data-price="28">
+          <div class="car-icon">🚘</div>
+          <div class="car-info">
+            <div class="car-name">专车</div>
+            <div class="car-desc">预计 <span class="eta">10</span> 分钟</div>
+          </div>
+          <div class="car-price">
+            <span class="price">¥28</span>
+          </div>
+        </div>
+        <div class="car-type" data-type="4" data-name="豪华车" data-price="58">
+          <div class="car-icon">🚘</div>
+          <div class="car-info">
+            <div class="car-name">豪华车</div>
+            <div class="car-desc">预计 <span class="eta">15</span> 分钟</div>
+          </div>
+          <div class="car-price">
+            <span class="price">¥58</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 优惠券入口 -->
+    <div class="coupon-bar" id="couponBar" style="display: none;">
+      <div class="coupon-info" id="couponInfo">
+        <span class="coupon-icon">🎫</span>
+        <span class="coupon-text" id="couponText">有 2 张优惠券可用</span>
+        <span class="coupon-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- 优惠券选择弹窗 -->
+    <div class="coupon-modal" id="couponModal">
+      <div class="modal-overlay" id="couponOverlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>选择优惠券</h3>
+          <button class="close-modal-btn" id="closeCouponBtn">✕</button>
+        </div>
+        <div class="modal-body" id="couponList">
+          <div class="loading-indicator">加载中...</div>
+        </div>
+        <div class="modal-footer">
+          <button class="no-coupon-btn" id="noCouponBtn">不使用优惠券</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 备注 -->
+    <div class="remark-section" id="remarkSection" style="display: none;">
+      <input type="text" id="remarkInput" placeholder="添加备注（选填）">
+    </div>
+
+    <!-- 确认出行按钮 -->
+    <div class="confirm-section" id="confirmSection" style="display: none;">
+      <button class="confirm-btn" id="confirmBtn">
+        <span class="btn-text">确认呼叫</span>
+        <span class="btn-price" id="btnPrice">¥12</span>
+      </button>
+    </div>
+  </div>
+
+    <!-- 底部导航 -->
+    <nav class="bottom-nav">
+      <div class="nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">首页</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">订单</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">🎫</span>
+        <span class="nav-text">优惠券</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">我的</span>
+      </div>
+    </nav>
+
+    <!-- 用户面板 -->
+    <div class="user-panel" id="userPanel">
+      <div class="panel-overlay" id="panelOverlay"></div>
+      <div class="panel-content">
+        <div class="panel-header">
+          <h3>账户</h3>
+          <button class="close-btn" id="closePanelBtn">✕</button>
+        </div>
+        <div class="user-info" id="userInfo">
+          <div class="user-avatar" id="userAvatar">👤</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">未登录</div>
+            <div class="user-phone" id="userPhone">-</div>
+          </div>
+        </div>
+        <div class="panel-menu">
+          <div class="menu-item" id="loginBtn">
+            <span class="menu-icon">🔑</span>
+            <span class="menu-text">登录 / 注册</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" id="logoutBtn" style="display: none;">
+            <span class="menu-icon">🚪</span>
+            <span class="menu-text">退出登录</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" id="realNameMenuItem">
+            <span class="menu-icon">👥</span> 
+            <span class="menu-text">乘客认证</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" id="addressMenuItem">
+            <span class="menu-icon">📍</span>
+            <span class="menu-text">常用地址</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" id="couponMenuItem">
+            <span class="menu-icon">🎫</span>
+            <span class="menu-text">我的优惠券</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" id="profileMenuItem">
+            <span class="menu-icon">👤</span>
+            <span class="menu-text">个人中心</span>
+            <span class="menu-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="./api.js"></script>
+  <script src="./ws.js"></script>
+  <script src="./ride-hailing.js"></script>
+</body>
+</html>

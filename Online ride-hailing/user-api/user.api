@@ -1,0 +1,171 @@
+syntax = "v1"
+
+info (
+	//      title:  "用户服务 API"
+	//      desc:   "用户注册、登录、验证码、用户详情接口"
+	author: "fly-pig"
+	email:  ""
+)
+
+type RegisterReq {
+	Phone    string `json:"phone"` // 手机号
+	Password string `json:"password"` // 密码
+	Code     string `json:"code"` // 验证码
+	Nickname string `json:"nickname"` // 昵称
+	Avatar   string `json:"avatar"` // 头像
+}
+
+type LoginReq {
+	Phone string `json:"phone"` // 手机号
+	Code  string `json:"code"` // 验证码
+}
+
+type SendCodeReq {
+	Phone string `json:"phone"` // 手机号
+}
+
+type UserDetailReq {
+	UserId int64 `json:"user_id"` // 用户ID
+}
+
+type UserListReq {
+	Page     int32 `json:"page"` // 页码
+	PageSize int32 `json:"page_size"` // 每页数量
+}
+
+type ServiceListReq {
+	Page      int32   `json:"page"`
+	PageSize  int32   `json:"pageSize"`
+	CarType   int32   `json:"carType"`
+	MinPrice  float64 `json:"minPrice"`
+	MaxPrice  float64 `json:"maxPrice"`
+	SortField string  `json:"sortField"`
+	SortOrder string  `json:"sortOrder"`
+}
+
+type UserInfo {
+	UserId     int64  `json:"user_id"` // 用户ID
+	Phone      string `json:"phone"` // 手机号
+	Nickname   string `json:"nickname"` // 昵称
+	Avatar     string `json:"avatar"` // 头像
+	UserType   int32  `json:"user_type"` // 用户类型
+	CreateTime int64  `json:"create_time"` // 注册时间
+}
+
+type UpdatePhoneReq {
+	UserId   int64  `json:"user_id"` // 用户ID
+	OldPhone string `json:"old_phone"` // 旧手机号
+	NewPhone string `json:"new_phone"` // 新手机号
+	Code     string `json:"code"` // 验证码
+}
+
+type RealNameAuthReq {
+	UserId   int64  `json:"user_id"` // 用户ID
+	RealName string `json:"real_name"` // 真实姓名
+	IdCard   string `json:"id_card"` // 身份证号
+}
+
+type AddAddressReq {
+	UserId    int64  `json:"user_id"` // 用户ID
+	Tag       string `json:"tag"` // 地址标签（如：家、公司、学校）
+	Address   string `json:"address"` // 地址详情
+	IsDefault bool   `json:"is_default"` // 是否设为默认地址
+}
+
+type AddcouponReq {
+	userId     int64 `json:"userId"` // 用户ID
+	templateId int64 `json:"templateId""` // 真实姓名
+	count      int64 `json:"count"` // 身份证号
+}
+
+type GetUserCouponReq {
+	userId   int64 `json:"userId"` // 用户ID
+	status   int64 `json:"status"` // 状态筛选：0-全部，1-未使用，2-已使用，3-已过期
+	page     int64 `json:"page"` // 页码
+	pageSize int32 `json:"pageSize"` // 每页数量
+}
+
+type AddPassengerOrderReq {
+	userId         int64   `json:"userId"`
+	passengerName  string  `json:"passengerName"`
+	PassengerPhone string  `json:"passengerPhone"`
+	StartAddress   string  `json:"startAddress"`
+	StartLng       float64 `json:"startLbg"`
+	StartLat       float64 `json:"startLat"`
+	EndAddress     string  `json:"endAddress"`
+	EndLng         float64 `json:"endLng"`
+	EndLat         float64 `json:"endLat"`
+	CarType        int32   `json:"carType"`
+	CouponId       int64   `json:"couponId"`
+	Remark         string  `json:"remark"`
+}
+
+type UserOrderListReq {
+	userId   int64 `json:"userId" form:"userId"` // 用户ID（乘客）
+	status   int32 `json:"status" form:"status"` // 状态筛选：0-全部，1-待支付，2-待接单，3-待上车，4-行程中，5-已完成，6-已取消
+	page     int32 `json:"page" form:"page"` // 页码
+	pageSize int32 `json:"pageSize" form:"pageSize"` // 每页数量
+}
+
+type PassengerOrderDetailReq {
+	userId  int64  `json:"userId" form:"userId"` // 用户ID（乘客）
+	orderId string `json:"orderId" form:"orderId"` // 订单号
+}
+
+type GetUnpaidOrdersReq {
+	HoursBefore int32 `json:"hours_before"` // 查询多少小时内的订单（默认24）
+}
+
+type Request {
+	Code    int32       `json:"code"` // 状态码
+	Message string      `json:"message"` // 消息
+	Data    interface{} `json:"data"`
+}
+
+service user-api {
+	@handler Register
+	post /user/register (RegisterReq) returns (Request)
+
+	@handler Login
+	post /user/login (LoginReq) returns (Request)
+
+	@handler SendCode
+	post /user/sendCode (SendCodeReq) returns (Request)
+
+	@handler GetUserDetail
+	post /user/detail (UserDetailReq) returns (Request)
+
+	@handler GetUserList
+	get /user/list (UserListReq) returns (Request)
+
+	@handler GetServiceList
+	get /service/list (ServiceListReq) returns (Request)
+
+	@handler UpdatePhone
+	post /user/updatePhone (UpdatePhoneReq) returns (Request)
+
+	@handler RealNameAuth
+	post /user/realNameAuth (RealNameAuthReq) returns (Request)
+
+	@handler AddAddress
+	post /user/addAddress (AddAddressReq) returns (Request)
+
+	@handler AddCoupon
+	post /user/addCoupon (AddcouponReq) returns (Request)
+
+	@handler GetUserCoupon
+	get /user/getUserCoupon (GetUserCouponReq) returns (Request)
+
+	@handler AddPassengerOrder
+	post /user/addPassengerOrderReq (AddPassengerOrderReq) returns (Request)
+
+	@handler GetUserOrderList
+	get /user/getUserOrderList (UserOrderListReq) returns (Request)
+
+	@handler GetPassengerOrderDetail
+	get /user/getPassengerOrderDetail (PassengerOrderDetailReq) returns (Request)
+
+	@handler GetUnpaidOrders
+	get /user/getUnpaidOrders (GetUnpaidOrdersReq) returns (Request)
+}
+

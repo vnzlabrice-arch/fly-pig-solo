@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>我的订单 - 飞猪出行</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .order-page {
+      min-height: 100vh;
+      background: var(--bg-gray);
+      padding-bottom: 80px;
+    }
+    
+    .page-header {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      height: 56px;
+      background: var(--bg-white);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      z-index: 100;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .page-header h1 {
+      flex: 1;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .back-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    
+    .order-list {
+      padding: 72px 16px 16px;
+    }
+    
+    .order-empty {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .order-empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+    
+    .order-empty-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    
+    .order-item {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .order-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .order-item:active {
+      transform: translateY(0);
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--border-color);
+    }
+    
+    .order-type {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .order-status {
+      font-size: 13px;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    
+    .order-status.pending {
+      background: #FFF3E0;
+      color: #E65100;
+    }
+    
+    .order-status.completed {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+    
+    .order-status.cancelled {
+      background: #FFEBEE;
+      color: #C62828;
+    }
+    
+    .order-route {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .route-dots {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .route-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    
+    .route-dot.start {
+      background: #00C853;
+    }
+    
+    .route-dot.end {
+      background: #FF3B30;
+    }
+    
+    .route-line {
+      width: 2px;
+      height: 20px;
+      background: var(--border-color);
+    }
+    
+    .route-text {
+      flex: 1;
+    }
+    
+    .route-from, .route-to {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    
+    .route-to {
+      color: var(--text-secondary);
+    }
+    
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .order-time {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    
+    .order-price {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .tab-bar {
+      display: flex;
+      background: var(--bg-white);
+      border-bottom: 1px solid var(--border-color);
+      position: fixed;
+      top: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      z-index: 99;
+    }
+    
+    .tab-item {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .tab-item.active {
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
+    .tab-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+    
+    /* 订单详情弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    
+    .modal-overlay.show {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: var(--bg-white);
+      width: 100%;
+      max-width: 430px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 20px 20px 0 0;
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #f5f5f5;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    
+    .modal-body {
+      padding: 16px;
+    }
+    
+    .detail-section {
+      margin-bottom: 20px;
+    }
+    
+    .detail-title {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+    
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+    
+    .detail-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .detail-value {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+    
+    .driver-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 12px;
+    }
+    
+    .driver-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+    }
+    
+    .driver-details {
+      flex: 1;
+    }
+    
+    .driver-name {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .driver-car {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .price-detail {
+      background: #fafafa;
+      border-radius: 12px;
+      padding: 16px;
+    }
+    
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 14px;
+    }
+    
+    .price-row.total {
+      padding-top: 12px;
+      margin-top: 8px;
+      border-top: 1px solid #eee;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    .price-row.total .detail-value {
+      color: var(--primary);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 12px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="order-page">
+    <header class="page-header">
+      <button class="back-btn" onclick="history.back()">←</button>
+      <h1>我的订单</h1>
+      <div style="width: 32px;"></div>
+    </header>
+    
+    <div class="tab-bar">
+      <div class="tab-item active" data-tab="0">全部</div>
+      <div class="tab-item" data-tab="2">待接单</div>
+      <div class="tab-item" data-tab="5">已完成</div>
+    </div>
+    
+    <div class="order-list" id="orderList">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <div>加载中...</div>
+      </div>
+    </div>
+    
+    <nav class="bottom-nav">
+      <div class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">首页</span>
+      </div>
+      <div class="nav-item active">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">订单</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">🎫</span>
+        <span class="nav-text">优惠券</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">我的</span>
+      </div>
+    </nav>
+  </div>
+  
+  <!-- 订单详情弹窗 -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">订单详情</div>
+        <button class="modal-close" onclick="closeDetailModal()">×</button>
+      </div>
+      <div class="modal-body" id="detailContent">
+        <!-- 详情内容将在这里动态渲染 -->
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+  <script src="./api.js"></script>
+  <script>
+    (function() {
+      const orderList = document.getElementById('orderList');
+      const toast = document.getElementById('toast');
+      const tabItems = document.querySelectorAll('.tab-item');
+      const navItems = document.querySelectorAll('.nav-item');
+      const detailModal = document.getElementById('detailModal');
+      const detailContent = document.getElementById('detailContent');
+      
+      let currentTab = 0; // 0 = 全部
+      let ordersData = [];
+      
+      function showToast(message, type = 'success') {
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(() => toast.className = 'toast', 2500);
+      }
+      
+      function formatTime(timestamp) {
+        if (!timestamp) return '-';
+        const date = new Date(timestamp * 1000);
+        return date.toLocaleString('zh-CN', {
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+      
+      function getStatusInfo(status) {
+        const statusMap = {
+          1: { text: '待支付', class: 'pending' },
+          2: { text: '待接单', class: 'pending' },
+          3: { text: '待上车', class: 'pending' },
+          4: { text: '行程中', class: 'pending' },
+          5: { text: '已完成', class: 'completed' },
+          6: { text: '已取消', class: 'cancelled' }
+        };
+        return statusMap[status] || { text: '未知', class: 'pending' };
+      }
+      
+      function getOrderTypeText(type) {
+        const typeMap = {
+          1: '即时用车',
+          2: '预约用车',
+          3: '拼车'
+        };
+        return typeMap[type] || '即时用车';
+      }
+      
+      function renderOrderItem(order) {
+        const status = getStatusInfo(order.status);
+        const price = order.actualPrice || order.estimatedPrice || 0;
+        
+        return `
+          <div class="order-item" onclick="showOrderDetail('${order.orderId}')">
+            <div class="order-header">
+              <span class="order-type">${order.carType || '快车'}</span>
+              <span class="order-status ${status.class}">${status.text}</span>
+            </div>
+            <div class="order-route">
+              <div class="route-dots">
+                <div class="route-dot start"></div>
+                <div class="route-line"></div>
+                <div class="route-dot end"></div>
+              </div>
+              <div class="route-text">
+                <div class="route-from">${order.startAddress || '-'}</div>
+                <div class="route-to">${order.endAddress || '-'}</div>
+              </div>
+            </div>
+            <div class="order-footer">
+              <span class="order-time">${formatTime(order.bookTime || order.createTime)}</span>
+              <span class="order-price">¥${price.toFixed(2)}</span>
+            </div>
+          </div>
+        `;
+      }
+      
+      function renderOrders(orders) {
+        if (!orders || orders.length === 0) {
+          orderList.innerHTML = `
+            <div class="order-empty">
+              <div class="order-empty-icon">📋</div>
+              <div class="order-empty-text">暂无订单记录</div>
+            </div>
+          `;
+          return;
+        }
+        
+        let filteredOrders = orders;
+        if (currentTab !== 0) {
+          filteredOrders = orders.filter(o => o.status === currentTab);
+        }
+        
+        if (filteredOrders.length === 0) {
+          orderList.innerHTML = `
+            <div class="order-empty">
+              <div class="order-empty-icon">📋</div>
+              <div class="order-empty-text">暂无相关订单</div>
+            </div>
+          `;
+          return;
+        }
+        
+        orderList.innerHTML = filteredOrders.map(renderOrderItem).join('');
+      }
+      
+      // 字段名转换：下划线转驼峰
+      function convertKeysToCamelCase(obj) {
+        if (Array.isArray(obj)) {
+          return obj.map(item => convertKeysToCamelCase(item));
+        }
+        if (obj !== null && typeof obj === 'object') {
+          return Object.keys(obj).reduce((result, key) => {
+            const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+            result[camelKey] = convertKeysToCamelCase(obj[key]);
+            return result;
+          }, {});
+        }
+        return obj;
+      }
+
+      async function loadOrders() {
+        orderList.innerHTML = `
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <div>加载中...</div>
+          </div>
+        `;
+
+        try {
+          const userId = parseInt(localStorage.getItem('user_id') || '0', 10);
+          if (!userId) {
+            showToast('请先登录', 'error');
+            orderList.innerHTML = `
+              <div class="order-empty">
+                <div class="order-empty-icon">⚠️</div>
+                <div class="order-empty-text">请先登录</div>
+              </div>
+            `;
+            return;
+          }
+
+          const status = currentTab === 0 ? undefined : currentTab;
+          const resp = await UserApi.getUserOrderList({
+            userId: userId,
+            status: status,
+            page: 1,
+            pageSize: 20
+          });
+
+          if (UserApi.isSuccessCode(resp.code)) {
+            ordersData = convertKeysToCamelCase(resp.data?.orders || []);
+            renderOrders(ordersData);
+          } else {
+            showToast(resp.message || '加载失败', 'error');
+            renderOrders([]);
+          }
+        } catch (error) {
+          console.error('加载订单失败:', error);
+          showToast('网络错误，请稍后重试', 'error');
+          renderOrders([]);
+        }
+      }
+      
+      async function showOrderDetail(orderId) {
+        const userId = parseInt(localStorage.getItem('user_id') || '0', 10);
+        if (!userId) {
+          showToast('请先登录', 'error');
+          return;
+        }
+
+        detailContent.innerHTML = `
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <div>加载中...</div>
+          </div>
+        `;
+        detailModal.classList.add('show');
+
+        try {
+          const resp = await UserApi.getPassengerOrderDetail({
+            userId: userId,
+            orderId: orderId
+          });
+
+          if (UserApi.isSuccessCode(resp.code)) {
+            const order = convertKeysToCamelCase(resp.data?.order);
+            const feeDetails = convertKeysToCamelCase(resp.data?.fee_details || []);
+            if (order) {
+              renderOrderDetail(order, feeDetails);
+            } else {
+              showToast('订单不存在', 'error');
+              closeDetailModal();
+            }
+          } else {
+            showToast(resp.message || '加载失败', 'error');
+            closeDetailModal();
+          }
+        } catch (error) {
+          console.error('加载订单详情失败:', error);
+          showToast('网络错误，请稍后重试', 'error');
+          closeDetailModal();
+        }
+      }
+      
+      function renderOrderDetail(order, feeDetails) {
+        const status = getStatusInfo(order.status);
+        const price = order.actualPrice || order.estimatedPrice || 0;
+        const carType = order.carType || '快车';
+        
+        let feeHtml = '';
+        if (feeDetails && feeDetails.length > 0) {
+          feeHtml = feeDetails.map(fee => `
+            <div class="price-row">
+              <span class="detail-label">${fee.feeName || '其他费用'}</span>
+              <span class="detail-value">¥${(fee.amount || 0).toFixed(2)}</span>
+            </div>
+          `).join('');
+        } else {
+          feeHtml = `
+            <div class="price-row">
+              <span class="detail-label">行程费用</span>
+              <span class="detail-value">¥${price.toFixed(2)}</span>
+            </div>
+          `;
+        }
+        
+        detailContent.innerHTML = `
+          <div class="detail-section">
+            <div class="detail-title">订单状态</div>
+            <div class="detail-item">
+              <span class="detail-label">订单号</span>
+              <span class="detail-value">${order.orderId}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">订单状态</span>
+              <span class="order-status ${status.class}" style="padding: 2px 8px; font-size: 12px;">${status.text}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">订单类型</span>
+              <span class="detail-value">${getOrderTypeText(order.orderType)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">车型</span>
+              <span class="detail-value">${carType}</span>
+            </div>
+          </div>
+          
+          <div class="detail-section">
+            <div class="detail-title">行程信息</div>
+            <div class="order-route" style="margin-bottom: 0;">
+              <div class="route-dots">
+                <div class="route-dot start"></div>
+                <div class="route-line"></div>
+                <div class="route-dot end"></div>
+              </div>
+              <div class="route-text">
+                <div class="route-from">${order.startAddress || '-'}</div>
+                <div class="route-to">${order.endAddress || '-'}</div>
+              </div>
+            </div>
+          </div>
+          
+          ${order.driverName ? `
+          <div class="detail-section">
+            <div class="detail-title">司机信息</div>
+            <div class="driver-info">
+              <div class="driver-avatar">🚗</div>
+              <div class="driver-details">
+                <div class="driver-name">${order.driverName || '-'}</div>
+                <div class="driver-car">${order.vehicleModel || carType} · ${order.licensePlate || '-'}</div>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+          
+          <div class="detail-section">
+            <div class="detail-title">费用明细</div>
+            <div class="price-detail">
+              ${feeHtml}
+              <div class="price-row total">
+                <span class="detail-label">实付金额</span>
+                <span class="detail-value">¥${price.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="detail-section">
+            <div class="detail-title">时间信息</div>
+            <div class="detail-item">
+              <span class="detail-label">下单时间</span>
+              <span class="detail-value">${formatTime(order.bookTime)}</span>
+            </div>
+            ${order.acceptTime ? `
+            <div class="detail-item">
+              <span class="detail-label">接单时间</span>
+              <span class="detail-value">${formatTime(order.acceptTime)}</span>
+            </div>
+            ` : ''}
+            ${order.startTime ? `
+            <div class="detail-item">
+              <span class="detail-label">开始行程</span>
+              <span class="detail-value">${formatTime(order.startTime)}</span>
+            </div>
+            ` : ''}
+            ${order.finishTime ? `
+            <div class="detail-item">
+              <span class="detail-label">完成时间</span>
+              <span class="detail-value">${formatTime(order.finishTime)}</span>
+            </div>
+            ` : ''}
+          </div>
+        `;
+      }
+      
+      function closeDetailModal() {
+        detailModal.classList.remove('show');
+      }
+      
+      tabItems.forEach(item => {
+        item.addEventListener('click', () => {
+          tabItems.forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          currentTab = parseInt(item.dataset.tab, 10);
+          loadOrders();
+        });
+      });
+      
+      navItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+          if (index === 0) window.location.href = './ride-hailing.html';
+          else if (index === 2) window.location.href = './coupons.html';
+          else if (index === 3) window.location.href = './profile.html';
+        });
+      });
+      
+      detailModal.addEventListener('click', (e) => {
+        if (e.target === detailModal) {
+          closeDetailModal();
+        }
+      });
+      
+      // 暴露给全局使用
+      window.showOrderDetail = showOrderDetail;
+      window.closeDetailModal = closeDetailModal;
+      
+      loadOrders();
+    })();
+  </script>
+</body>
+</html>

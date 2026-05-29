@@ -1,0 +1,15 @@
+Mysql:
+  Host: "115.190.196.35"
+  Port: 3306
+  User: "root"
+  Password: "4ay1nkal3u8ed77y"
+  Database: "wangyueche"
+Redis:
+  Host: "115.190.196.35"
+  Port: 6379
+  Password: "4ay1nkal3u8ed77y"
+  Database: 0
+Es:
+  Host: "http://115.190.196.35:9200"
+RabbitMQ:
+  MQURL: "amqp://2309A:2309A@:115.190.196.35.5672/2309A"

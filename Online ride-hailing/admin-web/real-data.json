@@ -1,0 +1,155 @@
+{
+  "orders": [
+    {
+      "car_type": "经济型",
+      "created_at": "2026-05-25T09:30:55.336+08:00",
+      "driver_id": 727,
+      "end_address": "城西客运总站",
+      "estimated_price": 28.5,
+      "final_price": 0,
+      "order_id": "P2026052511010100072710930552846",
+      "passenger_name": "张三",
+      "passenger_phone": "13866778899",
+      "start_address": "城东万达广场",
+      "status": 1
+    },
+    {
+      "car_type": "经济型",
+      "created_at": "2026-05-22T08:59:48.049+08:00",
+      "driver_id": 0,
+      "end_address": "晓店街道宿迁慈爱诊所奥园誉湖书院",
+      "estimated_price": 1016.7474090304213,
+      "final_price": 0,
+      "order_id": "P202605223820000001E08594848000697",
+      "passenger_name": "爱久眠",
+      "passenger_phone": "18345264789",
+      "start_address": "江苏省宿迁市宿豫区晓店街道宿迁泽达职业技术学院",
+      "status": 6
+    },
+    {
+      "car_type": null,
+      "created_at": "2026-05-21T16:03:45+08:00",
+      "driver_id": 1,
+      "end_address": null,
+      "estimated_price": null,
+      "final_price": 0,
+      "order_id": "1",
+      "passenger_name": null,
+      "passenger_phone": null,
+      "start_address": null,
+      "status": 5
+    },
+    {
+      "car_type": "经济型",
+      "created_at": "2026-05-09T14:36:53.877+08:00",
+      "driver_id": 0,
+      "end_address": "惠南镇南汇体育中心上海市浦东新区南汇体育中心",
+      "estimated_price": 1649.2614146301776,
+      "final_price": 0,
+      "order_id": "P202605093820000002E14365321000670",
+      "passenger_name": "爱久眠",
+      "passenger_phone": "18345264789",
+      "start_address": "上海市浦东新区惠南镇观海路中洲浦东珑玺台",
+      "status": 6
+    }
+  ],
+  "admins": [
+    {
+      "id": 1,
+      "last_login_time": "2026-05-07T16:08:10.973+08:00",
+      "role_id": 1,
+      "role_name": "开心小鱼",
+      "status": 1,
+      "username": "开心小鱼"
+    },
+    {
+      "id": 2,
+      "last_login_time": null,
+      "role_id": 2,
+      "role_name": "结七立取维物",
+      "status": 1,
+      "username": "呆头呆脑昕"
+    }
+  ],
+  "roles": [
+    {
+      "id": 1,
+      "menu_count": 0,
+      "menu_ids": [],
+      "name": "开心小鱼",
+      "remark": "1"
+    },
+    {
+      "id": 2,
+      "menu_count": 2,
+      "menu_ids": [
+        1,
+        1
+      ],
+      "name": "结七立取维物",
+      "remark": "2"
+    },
+    {
+      "id": 3,
+      "menu_count": 2,
+      "menu_ids": [
+        1,
+        1
+      ],
+      "name": "斯且名件该要",
+      "remark": "打厂离关"
+    }
+  ],
+  "menus": [
+    {
+      "icon": "setting",
+      "id": 1,
+      "name": "系统管理",
+      "parent_id": 0,
+      "path": "/system",
+      "sort": 1
+    }
+  ],
+  "cities": [
+    {
+      "city_code": "320700",
+      "city_name": "江苏连云港",
+      "id": 1,
+      "status": 1
+    }
+  ],
+  "carTypes": [
+    {
+      "base_price": "1253600.99",
+      "id": 1,
+      "km_price": "6.51",
+      "minute_price": "8.15",
+      "status": 1,
+      "type_name": "舒适型"
+    },
+    {
+      "base_price": "125000.81",
+      "id": 2,
+      "km_price": "6.29",
+      "minute_price": "8.35",
+      "status": 1,
+      "type_name": "经济型"
+    },
+    {
+      "base_price": "125000.81",
+      "id": 3,
+      "km_price": "6.29",
+      "minute_price": "8.35",
+      "status": 1,
+      "type_name": "经济型"
+    },
+    {
+      "base_price": "125000.81",
+      "id": 4,
+      "km_price": "6.29",
+      "minute_price": "8.35",
+      "status": 1,
+      "type_name": "经济型"
+    }
+  ]
+}

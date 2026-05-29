@@ -1,0 +1,58 @@
+syntax = "v1"
+
+info (
+	author: "fzy20060426"
+	email:  "3594659914@qq.com"
+)
+
+type SendSmsReq {
+	Phone string `json:"phone"`
+}
+
+type DriverLoginReq {
+	Phone    string `json:"phone"`
+	Code     string `json:"code"`
+	DriverId int    `json:"driverId"`
+}
+
+type DriverAuthReq {
+	RealName    string `json:"realName"`
+	IDCard      string `json:"idCard"`
+	IDCardFront string `json:"idCardFront"`
+	IDCardBack  string `json:"idCardBack"`
+	LicenseImg  string `json:"licenseImg"`
+	Token       string `json:"token"`
+}
+
+type CartAuthReq {
+	CarPlate       string `json:"carPlate"`
+	CarModel       string `json:"carModel"`
+	DrivingLicense string `json:"drivingLicense"`
+	Token          string `json:"token"`
+}
+
+type OutLoginReq {}
+
+type Response {
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
+	Data interface{} `json:"data"`
+}
+
+service driver-api {
+	@handler SendSmsReq
+	post /sendSms (SendSmsReq) returns (Response)
+
+	@handler DriverLoginReq
+	post /driverLogin (DriverLoginReq) returns (Response)
+
+	@handler DriverAuthReq
+	post /driverAuth (DriverAuthReq) returns (Response)
+
+	@handler CartAuthReq
+	post /cartAuth (CartAuthReq) returns (Response)
+
+	@handler OutLoginReq
+	post /outLogin (OutLoginReq) returns (Response)
+}
+
